@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' https://raw.githubusercontent.com; connect-src https://api.github.com; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>Image Studio · MeatnDoor</title>
+  <link rel="icon" href="./assets/meatndoor-logo.png">
+  <link rel="stylesheet" href="./style.css">
+  <script defer src="./app.js"></script>
+</head>
+<body>
+  <header><div class="wrap bar"><img src="./assets/meatndoor-logo.png" alt="MeatnDoor"><span class="product">Image Studio</span><button id="connect" class="account">Connect uploads</button></div></header>
+  <main class="wrap">
+    <h1>Image Studio<span>.</span></h1>
+    <p class="intro">Upload your MeatnDoor images and share a direct link.</p>
+    <section class="drop" id="drop" aria-labelledby="upload-title">
+      <span class="upload-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m-4.5 4.5L12 3l4.5 4.5M4 14v4a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-4"/></svg></span>
+      <h2 id="upload-title">Drop an image here</h2>
+      <p>JPG, PNG, WebP, GIF or AVIF · Up to 10 MiB</p>
+      <div class="actions"><button id="choose" class="primary">Choose image</button><a id="github-upload" target="_blank" rel="noopener noreferrer" href="https://github.com/NARS77/meatndoor-image-host/upload/media/images">Upload via GitHub</a></div>
+      <input type="file" id="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" hidden>
+    </section>
+    <p id="notice" role="status" aria-live="polite"></p>
+    <div id="result" hidden><strong>Image link ready</strong><input aria-label="Public image URL" id="result-url" readonly><button id="result-copy">Copy link</button></div>
+    <section aria-labelledby="library-title"><div class="section-head"><h2 id="library-title">Hosted images</h2><button class="secondary" id="refresh">Refresh</button></div>
+      <p id="library-state" role="status">Loading library…</p><ul id="library"></ul>
+    </section>
+  </main>
+  <dialog id="auth" aria-labelledby="auth-title">
+    <form id="auth-form"><h2 id="auth-title">Connect direct uploads</h2><p>Use a fine-grained GitHub token for <b>NARS77/meatndoor-image-host</b>. Choose only this repository and give it <b>Contents · Read and write</b> access.</p>
+      <a href="https://github.com/settings/personal-access-tokens/new?name=MeatnDoor+Image+Studio&amp;target_name=NARS77&amp;contents=write" target="_blank" rel="noopener noreferrer">Create token on GitHub</a>
+      <label for="token">Repository token</label><input type="password" id="token" required autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+      <p class="small">The token stays in memory for this tab. Uploaded images are public.</p>
+      <div class="dialog-buttons"><button type="button" id="cancel">Cancel</button><button class="primary" id="save-token">Connect</button></div>
+    </form>
+  </dialog>
+</body>
+</html>

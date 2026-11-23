@@ -93,11 +93,11 @@ function imageRow(entry) {
   return row;
 }
 
-async function refreshLibrary() {
+async function refreshLibrary(reference = branch) {
   const id = ++libraryRequest;
   byId("refresh").disabled = true;
   try {
-    const result = await request("/git/trees/" + branch + "?recursive=1");
+    const result = await request("/git/trees/" + reference + "?recursive=1");
     if (id !== libraryRequest) return;
     const entries = result.tree.filter(entry => entry.type === "blob" &&
       /^images\/.+\.(jpe?g|png|webp|gif|avif)$/i.test(entry.path));
@@ -146,10 +146,12 @@ async function upload(file) {
     const stem = file.name.replace(/\.[^.]+$/, "").replace(/[^\p{L}\p{N} _.-]+/gu, "-").replace(/^[. ]+|[. ]+$/g, "").slice(0, 85) || "image";
     const path = "images/" + digest + "/" + stem + "." + extension;
     const endpoint = "/contents/" + encodedPath(path);
+    let tree = branch;
     try {
-      await request(endpoint, { method: "PUT", body: JSON.stringify({
+      const saved = await request(endpoint, { method: "PUT", body: JSON.stringify({
         message: "Upload " + stem + "." + extension, branch, content: await readBase64(file)
       }) });
+      tree = saved.commit.tree.sha;
     } catch (error) {
       // A duplicate upload or a lost response can leave the complete file in place.
       if (error.status && ![409, 422].includes(error.status)) throw error;
@@ -158,7 +160,7 @@ async function upload(file) {
     }
     showLink(publicUrl(path));
     byId("notice").textContent = "Uploaded " + file.name + ".";
-    await refreshLibrary();
+    await refreshLibrary(tree);
   } catch (error) {
     byId("notice").textContent = error.message;
   } finally {
@@ -239,11 +241,16 @@ drop.ondrop = event => {
   else byId("notice").textContent = "Choose one image at a time.";
 };
 
-byId("refresh").onclick = refreshLibrary;
+byId("refresh").onclick = () => refreshLibrary();
 byId("github-upload").onclick = () => {
   waitingForGitHub = true;
   byId("notice").textContent = "Commit your image to the media branch on GitHub, then return here to copy its link.";
 };
-window.addEventListener("focus", () => { if (waitingForGitHub) refreshLibrary(); });
+window.addEventListener("focus", () => {
+  if (waitingForGitHub) {
+    waitingForGitHub = false;
+    refreshLibrary();
+  }
+});
 byId("result-copy").onclick = () => copyLink(byId("result-url").value, byId("result-copy"));
 refreshLibrary();
